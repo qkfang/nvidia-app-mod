@@ -4,9 +4,6 @@
 
 Create a new resource group and use it for your labs.
 
-```powershell
-```
-
 ## Lab 2
 
 Connect to remote VM using password
