@@ -212,7 +212,7 @@ Configure permissions
 ```powershell
 $CONTOSO_SEARCH_SERVICE_NAME="contososrch969954" #edit name
 $CONTOSO_STORAGE_ACCOUNT_NAME="contososa476766" #edit name
-$CONTOSO_OPENAI_NAME="aoai3222" #edit name
+$CONTOSO_OPENAI_NAME="aoaixxxx" #edit name
 ```
 
 ```powershell
@@ -346,7 +346,7 @@ Write-Host -ForegroundColor Green  "Chatapp URL is: $CONTOSO_CHAT_URL"
 App Setting Configuration
 
 ```powershell
-AZURE_OPENAI_ENDPOINT="https://aoai3222.openai.azure.com/" # edit
+AZURE_OPENAI_ENDPOINT="https://aoaixxxx.openai.azure.com/" # edit
 AZURE_OPENAI_API_KEY="ATNNceXifFgxxxx" # edit
 AZURE_OPENAI_DEPLOYMENT_ID="gpt-4o"
 AZURE_AI_SEARCH_ENDPOINT="https://contososrch969954.search.windows.net" # edit
@@ -408,12 +408,12 @@ Remove-Item -Recurse -Force ./docker-dist
 Deploy app
 
 ```powershell
-$CONTOSO_HOTEL_ENV = "contosoenv996543"
-$AZURE_OPENAI_ENDPOINT = "https://aoai3222.openai.azure.com/"
-$AZURE_OPENAI_API_KEY = "ATNNceXifFgxxxx"
-$AZURE_AI_SEARCH_ENDPOINT = "https://contososrch969954.search.windows.net"
-$AZURE_AI_SEARCH_API_KEY = "jBfoENDvKzPvof9xxxx"
-$PGHOST = "j3ufxxxx.postgres.database.azure.com"
+$CONTOSO_HOTEL_ENV = "contosoenv996543" #edit
+$AZURE_OPENAI_ENDPOINT = "https://aoaixxxx.openai.azure.com/" #edit
+$AZURE_OPENAI_API_KEY = "ATNNceXifFgxxxx" #edit
+$AZURE_AI_SEARCH_ENDPOINT = "https://contososrch969954.search.windows.net" #edit
+$AZURE_AI_SEARCH_API_KEY = "jBfoENDvKzPvof9xxxx" #edit
+$PGHOST = "j3ufxxxx.postgres.database.azure.com" #edit
 ```
 
 ```powershell
