@@ -2,7 +2,7 @@
 
 ## Lab 1
 
-create a new resource group for your labs
+Create a new resource group and use it for your labs.
 
 ```powershell
 ```
@@ -20,15 +20,13 @@ sudo gpasswd -a $USER docker
 exit
 ```
 
-Run below commands to start up NVIDIA model
+Run below commands to setup NVIDIA model
 
 ```bash
-export NGC_API_KEY="nvapi-92kPYcNVki2yYXCxxxxx"
+export NGC_API_KEY="nvapi-92kPYcNVki2yYXCxxxxx" #edit
 echo "export NGC_API_KEY=your-ngc-api-key" >> ~/.bashrc
 echo "$NGC_API_KEY" | docker login nvcr.io --username '$oauthtoken' --password-stdin
 ```
-
-Set model selector
 
 ```bash
 export NIM_TAGS_SELECTOR="name=parakeet-1-1b-ctc-riva-en-us,mode=all"
@@ -46,6 +44,8 @@ docker run -it --rm --name=riva-asr \
 
 ## Lab 3
 
+Build monolithic app
+
 ```powershell
 docker build -t "pycontosohotel:v1.0.0" .
 ```
@@ -60,6 +60,8 @@ az acr login --name $ACR_NAME
 docker tag "pycontosohotel:v1.0.0" "$ACR_NAME.azurecr.io/pycontosohotel:v1.0.0"
 docker push "$ACR_NAME.azurecr.io/pycontosohotel:v1.0.0"
 ```
+
+Deploy database and connect with app locally
 
 ```powershell
 Connect-AzAccount
@@ -78,7 +80,7 @@ POSTGRES_CONNECTION_STRING example: j3ufxxxx.postgres.database.azure.com;port=54
 
 ## Lab 4
 
-Split Frontend and Backend
+App modernisation, split Frontend and Backend apps
 
 ```powershell
 cd C:\temp\
@@ -108,7 +110,7 @@ cp -r C:/temp/ContosoHotel/contoso_hotel/dblayer C:\temp\ContosoHotel\UpdatedApp
 cp C:/temp/ContosoHotel/contoso_hotel/*.py C:\temp\ContosoHotel\UpdatedApp\Backend\contoso_hotel\
 ```
 
-Push frontend and backend images
+Build frontend and backend containers
 
 ```powershell
 $ACR_NAME = "acrxxx" #edit
@@ -146,14 +148,14 @@ az acr update -n $ACR_NAME --admin-enabled true
 $CONTOSO_ACR_CREDENTIAL = az acr credential show --name $ACR_NAME --query "passwords[0].value" -o tsv
 ```
 
-Create Container app env
+Create Container App env
 
 ```powershell
 az containerapp env create --name "$CONTOSO_HOTEL_ENV" --resource-group $RG --location "$AZURE_REGION"
 Write-Host -ForegroundColor Green  "Default Domain is: $(az containerapp env show --name "$CONTOSO_HOTEL_ENV" --resource-group $RG --query "properties.defaultDomain" -o tsv)"
 ```
 
-Create backend app
+Deploy backend app
 
 ```powershell
 az containerapp create --name "backend" --resource-group $RG --environment "$CONTOSO_HOTEL_ENV" --image "$ACR_NAME.azurecr.io/pycontosohotel-backend:v1.0.0" --target-port 8000 --ingress external --transport http --registry-server "$ACR_NAME.azurecr.io" --registry-username "$ACR_NAME" --registry-password "$CONTOSO_ACR_CREDENTIAL" --env-vars POSTGRES_CONNECTION_STRING="host=<connstr>;"
@@ -164,8 +166,7 @@ Write-Host -ForegroundColor Green  "Backend URL is: $CONTOSO_BACKEND_URL"
 
 POSTGRES_CONNECTION_STRING example: j3ufxxxx.postgres.database.azure.com;port=5432;database=pycontosohotel;user=contosoadmin;password=1234ABcd!;
 
-
-Create frontend app
+Deploy frontend app
 
 ```powershell
 az containerapp create --name "frontend" --resource-group $RG --environment "$CONTOSO_HOTEL_ENV" --image "$ACR_NAME.azurecr.io/pycontosohotel-frontend:v1.0.0" --target-port 8000 --ingress external --transport http --registry-server "$ACR_NAME.azurecr.io" --registry-username "$ACR_NAME" --registry-password "$CONTOSO_ACR_CREDENTIAL" --env-vars "API_BASEURL=$CONTOSO_BACKEND_URL"
@@ -207,11 +208,11 @@ $CONTOSO_SEARCH_SERVICE_NAME="contososrch$(Get-Random -Minimum 100000 -Maximum 9
 az search service create --name $CONTOSO_SEARCH_SERVICE_NAME --resource-group $RG --sku Basic --location $AZURE_REGION  --auth-options aadOrApiKey --aad-auth-failure-mode http403 --identity-type SystemAssigned
 ```
 
-Configure permissions
+Configure RBAC permissions
 
 ```powershell
-$CONTOSO_SEARCH_SERVICE_NAME="contososrch969954" #edit
-$CONTOSO_STORAGE_ACCOUNT_NAME="contososa476766" #edit
+$CONTOSO_SEARCH_SERVICE_NAME="contososrchxxxx" #edit
+$CONTOSO_STORAGE_ACCOUNT_NAME="contososaxxxx" #edit
 $CONTOSO_OPENAI_NAME="aoaixxxx" #edit
 ```
 
@@ -241,11 +242,10 @@ az role assignment create --role "Search Service Contributor" --assignee $AI_IDE
 
 ## Lab 6
 
-
 Connect to postgres sql
 
 ```powershell
-export PGHOST="j3ufxxxx.postgres.database.azure.com" # edit
+export PGHOST="j3ufxxxx.postgres.database.azure.com" #edit
 export PGUSER="contosoadmin"
 export PGPORT="5432"
 export PGDATABASE="pycontosohotel"
@@ -271,7 +271,7 @@ $AI_HUB_NAME="ai-hub$(Get-Random -Minimum 100000 -Maximum 999999)"
 Write-Host -ForegroundColor Green  "AI Hub name is: " $AI_HUB_NAME
 ```
 
-Create configurations
+Create Prompt Flow configurations
 
 ```powershell
 hostname: j3ufxxxx.postgres.database.azure.com #edit
@@ -289,25 +289,23 @@ az network nsg rule create --resource-group $RG --nsg-name vmi3222-nsg --name al
 curl http://172.212.82.21:9000/v1/health/ready
 ```
 
-
-Run speech app
+Setup Speech App
 
 ```powershell
 git clone https://github.com/CloudLabsAI-Azure/NVIDIA-Speech-to-text.git
 ```
 
-
-Server & Azure AI Foundry configuration
+NVIDIA model & Azure AI Foundry configuration
 
 ```powershell
-RIVA_SERVER="172.212.xx.xx:50051" # edit
+RIVA_SERVER="172.212.xx.xx:50051" #edit
 LANGUAGE_CODE=en-US
 PORT=5000
-AZURE_ENDPOINT_URL="https://contosopf-xxxx.eastus2.inference.ml.azure.com/score" # edit
-AZURE_API_KEY="7zAw45xtgEBxxxx" # edit
+AZURE_ENDPOINT_URL="https://contosopf-xxxx.eastus2.inference.ml.azure.com/score" #edit
+AZURE_API_KEY="7zAw45xtgEBxxxx" #edit
 ```
 
-Run App locally
+Run Speech App locally
 
 ```powershell
 pip install -r requirements
@@ -316,13 +314,13 @@ python app.py
 
 ```powershell
 $RG = "rg-daniel"
-$AZURE_REGION = "eastus2" # edit
-$ACR_NAME = "acrxxx" # edit
-$CONTOSO_HOTEL_ENV = "contosoenv996543" # edit
+$AZURE_REGION = "eastus2" #edit
+$ACR_NAME = "acrxxx" #edit
+$CONTOSO_HOTEL_ENV = "contosoenv996543" #edit
 $CONTOSO_ACR_CREDENTIAL = az acr credential show --name $ACR_NAME --query "passwords[0].value" -o tsv
 ```
 
-Build App
+Build Speech App
 
 ```powershell
 docker build -t "chatapp:v1.0.0" .
@@ -330,7 +328,7 @@ docker tag "chatapp:v1.0.0" "$ACR_NAME.azurecr.io/chatapp:v1.0.0"
 docker push "$ACR_NAME.azurecr.io/chatapp:v1.0.0"
 ```
 
-Deploy app
+Deploy Speech app
 
 ```powershell
 $chatapp = "chatapp$(Get-Random -Minimum 100000 -Maximum 999999)"
@@ -346,13 +344,13 @@ Write-Host -ForegroundColor Green  "Chatapp URL is: $CONTOSO_CHAT_URL"
 App Setting Configuration
 
 ```powershell
-AZURE_OPENAI_ENDPOINT="https://aoaixxxx.openai.azure.com/" # edit
-AZURE_OPENAI_API_KEY="ATNNceXifFgxxxx" # edit
+AZURE_OPENAI_ENDPOINT="https://aoaixxxx.openai.azure.com/" #edit
+AZURE_OPENAI_API_KEY="ATNNceXifFgxxxx" #edit
 AZURE_OPENAI_DEPLOYMENT_ID="gpt-4o"
-AZURE_AI_SEARCH_ENDPOINT="https://contososrch969954.search.windows.net" # edit
-AZURE_AI_SEARCH_INDEX="brochures-vector" # edit
-AZURE_AI_SEARCH_API_KEY="jBfoENDvKzPvof9xxxx" # edit
-PGHOST="j3ufxxxx.postgres.database.azure.com" # edit
+AZURE_AI_SEARCH_ENDPOINT="https://contososrchxxxx.search.windows.net" #edit
+AZURE_AI_SEARCH_INDEX="brochures-vector" #edit
+AZURE_AI_SEARCH_API_KEY="jBfoENDvKzPvof9xxxx" #edit
+PGHOST="j3ufxxxx.postgres.database.azure.com" #edit
 PGPORT="5432"
 PGUSER="promptflow"
 PGDATABASE="pycontosohotel"
@@ -366,7 +364,7 @@ set-content env:\$name $value
 }
 ```
 
-Create prompflow connections
+Create Prompt Flow connections
 
 ```powershell
 pf connection create --file azure_openai.yaml --name azure_openai --set "api_base=$env:AZURE_OPENAI_ENDPOINT" --set "api_key=$env:AZURE_OPENAI_API_KEY"
@@ -376,7 +374,7 @@ pf connection create --file postgresql.yaml --name postgresql --set "configs.hos
 pf connection list | ConvertFrom-Json | Select-Object name, type |Format-Table
 ```
 
-Run prompflow locally
+Run Prompt Flow locally
 
 ```powershell
 pip install -r requirements.txt
@@ -384,11 +382,11 @@ pf flow test --flow . --interactive
 ```
 
 ```powershell
-$ACR_NAME = "acrxxx" # edit
+$ACR_NAME = "acrxxx" #edit
 az acr login --name "$ACR_NAME"
 ```
 
-Build app
+Build Prompt Flow as Chatbot app
 
 ```powershell
 pf flow build --source . --output docker-dist --format docker
@@ -404,20 +402,19 @@ Get-ChildItem -Path '.\docker-dist\connections' -Filter '*.yaml' | Get-Content |
 # Remove-Item -Recurse -Force ./docker-dist
 ```
 
-
-Deploy app
+Configure Chatbot app
 
 ```powershell
 $CONTOSO_HOTEL_ENV = "contosoenv996543" #edit
 $AZURE_OPENAI_ENDPOINT = "https://aoaixxxx.openai.azure.com/" #edit
 $AZURE_OPENAI_API_KEY = "ATNNceXifFgxxxx" #edit
-$AZURE_AI_SEARCH_ENDPOINT = "https://contososrch969954.search.windows.net" #edit
+$AZURE_AI_SEARCH_ENDPOINT = "https://contososrchxxxx.search.windows.net" #edit
 $AZURE_AI_SEARCH_API_KEY = "jBfoENDvKzPvof9xxxx" #edit
 $PGHOST = "j3ufxxxx.postgres.database.azure.com" #edit
 ```
 
 ```powershell
-$RG = "rg-daniel" # edit
+$RG = "rg-daniel" #edit
 $CONTOSO_ACR_CREDENTIAL = az acr credential show --name $ACR_NAME --query "passwords[0].value" -o tsv
 $PGUSER = "promptflow"
 $PGPASSWORD = "1234ABCD!"
@@ -425,7 +422,7 @@ $PGDATABASE = "pycontosohotel"
 $PGPORT = "5432"
 ```
 
-Deploy Chatbot App
+Deploy Chatbot app
 
 ```powershell
 az containerapp create --name "chatbot" --resource-group $RG --environment "$CONTOSO_HOTEL_ENV" `
@@ -439,7 +436,7 @@ $CONTOSO_CHATBOT_URL = "https://$(az containerapp show --name "chatbot" --resour
 Write-Host -ForegroundColor Green  "Promptflow URL is: $CONTOSO_CHATBOT_URL"
 ```
 
-Configure frontend & backend app
+Configure Frontend & Backend app
 
 ```powershell
 $CONTOSO_BACKEND_URL = "https://$(az containerapp show --name "backend" --resource-group $RG --query 'properties.configuration.ingress.fqdn' -o tsv)"
