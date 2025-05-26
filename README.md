@@ -55,7 +55,7 @@ az login --use-device-code
 ```
 
 ```powershell
-$ACR_NAME = "acr3222" #edit name
+$ACR_NAME = "acrxxx" #edit
 az acr login --name $ACR_NAME
 docker tag "pycontosohotel:v1.0.0" "$ACR_NAME.azurecr.io/pycontosohotel:v1.0.0"
 docker push "$ACR_NAME.azurecr.io/pycontosohotel:v1.0.0"
@@ -66,7 +66,7 @@ Connect-AzAccount
 ```
 
 ```powershell
-$RG = "rg-daniel" #edit name
+$RG = "rg-daniel" #edit
 .\iac\manageIac.ps1 -iacAction create -passwd "1234ABcd!" -deploy "postgresql" -rgname $RG -location "eastus2"
 ```
 
@@ -111,7 +111,7 @@ cp C:/temp/ContosoHotel/contoso_hotel/*.py C:\temp\ContosoHotel\UpdatedApp\Backe
 Push frontend and backend images
 
 ```powershell
-$ACR_NAME = "acr3222" #edit name
+$ACR_NAME = "acrxxx" #edit
 cd C:\temp\ContosoHotel\UpdatedApp\Frontend
 docker build -t "pycontosohotel-frontend:v1.0.0" .
 docker tag "pycontosohotel-frontend:v1.0.0" "$ACR_NAME.azurecr.io/pycontosohotel-frontend:v1.0.0"
@@ -133,9 +133,9 @@ az provider register --namespace Microsoft.OperationalInsights
 ```
 
 ```powershell
-$RG = "rg-daniel" #edit name
-$AZURE_REGION = "eastus2" #edit name
-$ACR_NAME = "acr3222" #edit name
+$RG = "rg-daniel" #edit
+$AZURE_REGION = "eastus2" #edit
+$ACR_NAME = "acrxxx" #edit
 
 $CONTOSO_HOTEL_ENV = "contosoenv$(Get-Random -Minimum 100000 -Maximum 999999)"
 Write-Host -ForegroundColor Green  "CONTOSO_HOTEL_ENV is: $CONTOSO_HOTEL_ENV"
@@ -210,9 +210,9 @@ az search service create --name $CONTOSO_SEARCH_SERVICE_NAME --resource-group $R
 Configure permissions
 
 ```powershell
-$CONTOSO_SEARCH_SERVICE_NAME="contososrch969954" #edit name
-$CONTOSO_STORAGE_ACCOUNT_NAME="contososa476766" #edit name
-$CONTOSO_OPENAI_NAME="aoaixxxx" #edit name
+$CONTOSO_SEARCH_SERVICE_NAME="contososrch969954" #edit
+$CONTOSO_STORAGE_ACCOUNT_NAME="contososa476766" #edit
+$CONTOSO_OPENAI_NAME="aoaixxxx" #edit
 ```
 
 ```powershell
@@ -274,7 +274,7 @@ Write-Host -ForegroundColor Green  "AI Hub name is: " $AI_HUB_NAME
 Create configurations
 
 ```powershell
-hostname: j3ufxxxx.postgres.database.azure.com #edit name
+hostname: j3ufxxxx.postgres.database.azure.com #edit
 user: promptflow
 port:5432
 database: pycontosohotel
@@ -317,7 +317,7 @@ python app.py
 ```powershell
 $RG = "rg-daniel"
 $AZURE_REGION = "eastus2" # edit
-$ACR_NAME = "acr3222" # edit
+$ACR_NAME = "acrxxx" # edit
 $CONTOSO_HOTEL_ENV = "contosoenv996543" # edit
 $CONTOSO_ACR_CREDENTIAL = az acr credential show --name $ACR_NAME --query "passwords[0].value" -o tsv
 ```
@@ -384,7 +384,7 @@ pf flow test --flow . --interactive
 ```
 
 ```powershell
-$ACR_NAME = "acr3222" # edit
+$ACR_NAME = "acrxxx" # edit
 az acr login --name "$ACR_NAME"
 ```
 
@@ -401,7 +401,7 @@ Copy-Item -Path .\postgresql.yaml -Destination .\docker-dist\connections -Force
 docker build -t "$ACR_NAME.azurecr.io/chatbot:v1.0.0" ./docker-dist
 docker push "$ACR_NAME.azurecr.io/chatbot:v1.0.0"
 Get-ChildItem -Path '.\docker-dist\connections' -Filter '*.yaml' | Get-Content | Select-String 'env:'
-Remove-Item -Recurse -Force ./docker-dist
+# Remove-Item -Recurse -Force ./docker-dist
 ```
 
 
