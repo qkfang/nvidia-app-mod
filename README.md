@@ -152,7 +152,7 @@ az containerapp env create --name "$CONTOSO_HOTEL_ENV" --resource-group $RG --lo
 Write-Host -ForegroundColor Green  "Default Domain is: $(az containerapp env show --name "$CONTOSO_HOTEL_ENV" --resource-group $RG --query "properties.defaultDomain" -o tsv)"
 ```
 
-Deploy backend app
+Deploy Backend app
 
 ```powershell
 az containerapp create --name "backend" --resource-group $RG --environment "$CONTOSO_HOTEL_ENV" --image "$ACR_NAME.azurecr.io/pycontosohotel-backend:v1.0.0" --target-port 8000 --ingress external --transport http --registry-server "$ACR_NAME.azurecr.io" --registry-username "$ACR_NAME" --registry-password "$CONTOSO_ACR_CREDENTIAL" --env-vars POSTGRES_CONNECTION_STRING="host=<connstr>;"
@@ -163,7 +163,7 @@ Write-Host -ForegroundColor Green  "Backend URL is: $CONTOSO_BACKEND_URL"
 
 POSTGRES_CONNECTION_STRING example: j3ufxxxx.postgres.database.azure.com;port=5432;database=pycontosohotel;user=contosoadmin;password=1234ABcd!;
 
-Deploy frontend app
+Deploy Frontend app
 
 ```powershell
 az containerapp create --name "frontend" --resource-group $RG --environment "$CONTOSO_HOTEL_ENV" --image "$ACR_NAME.azurecr.io/pycontosohotel-frontend:v1.0.0" --target-port 8000 --ingress external --transport http --registry-server "$ACR_NAME.azurecr.io" --registry-username "$ACR_NAME" --registry-password "$CONTOSO_ACR_CREDENTIAL" --env-vars "API_BASEURL=$CONTOSO_BACKEND_URL"
