@@ -26,17 +26,22 @@ echo "$NGC_API_KEY" | docker login nvcr.io --username '$oauthtoken' --password-s
 ```
 
 ```bash
-export NIM_TAGS_SELECTOR="name=parakeet-1-1b-ctc-riva-en-us,mode=all"
-docker run -it --rm --name=riva-asr \
-   --gpus '"device=0"' \
-   --shm-size=8GB \
-   -e NGC_API_KEY \
-   -e NIM_HTTP_API_PORT=9000 \
-   -e NIM_GRPC_API_PORT=50051 \
-   -p 9000:9000 \
-   -p 50051:50051 \
-   -e NIM_TAGS_SELECTOR \
-   nvcr.io/nim/nvidia/riva-asr:1.3.0
+# Set model selector
+export CONTAINER_ID=parakeet-1-1b-ctc-en-us
+export NIM_TAGS_SELECTOR="mode=all"
+
+# Run the container
+docker run -it --rm --name=$CONTAINER_ID \
+--runtime=nvidia \
+--gpus '"device=0"' \
+--shm-size=8GB \
+-e NGC_API_KEY \
+-e NIM_HTTP_API_PORT=9000 \
+-e NIM_GRPC_API_PORT=50051 \
+-p 9000:9000 \
+-p 50051:50051 \
+-e NIM_TAGS_SELECTOR \
+nvcr.io/nim/nvidia/$CONTAINER_ID:latest
 ```
 
 ## Lab 3
@@ -58,7 +63,7 @@ docker tag "pycontosohotel:v1.0.0" "$ACR_NAME.azurecr.io/pycontosohotel:v1.0.0"
 docker push "$ACR_NAME.azurecr.io/pycontosohotel:v1.0.0"
 ```
 
-Deploy database and connect with app locally
+Deploy database and connect with app locally in powershell.
 
 ```powershell
 Connect-AzAccount
@@ -66,7 +71,8 @@ Connect-AzAccount
 
 ```powershell
 $RG = "rg-daniel" #edit
-.\iac\manageIac.ps1 -iacAction create -passwd "1234ABcd!" -deploy "postgresql" -rgname $RG -location "eastus2"
+$AZURE_REGION = "eastus2" #edit
+.\iac\manageIac.ps1 -iacAction create -passwd "1234ABcd!" -deploy "postgresql" -rgname $RG -location $AZURE_REGION
 ```
 
 ```powershell
@@ -79,46 +85,51 @@ POSTGRES_CONNECTION_STRING example: j3ufxxxx.postgres.database.azure.com;port=54
 
 App modernisation, split Frontend and Backend apps
 
+Go to the root of the repo, and run below commands.
+
 ```powershell
-cd C:\temp\
+cd C:\xxxx\ContosoHotel
 mkdir -p ContosoHotel/UpdatedApp/Frontend 
 mkdir -p ContosoHotel/UpdatedApp/Backend
 ```
 
 ```powershell
 -- run in powershell
-cp startup.* C:\temp\ContosoHotel\UpdatedApp\Frontend
-cp uwsgi.ini C:\temp\ContosoHotel\UpdatedApp\Frontend
-cp Dockerfile C:\temp\ContosoHotel\UpdatedApp\Frontend
-cp *.docker* C:\temp\ContosoHotel\UpdatedApp\Frontend
-cp requirements.txt C:\temp\ContosoHotel\UpdatedApp\Frontend
+cp startup.* ContosoHotel\UpdatedApp\Frontend
+cp uwsgi.ini ContosoHotel\UpdatedApp\Frontend
+cp Dockerfile ContosoHotel\UpdatedApp\Frontend
+cp *.docker* ContosoHotel\UpdatedApp\Frontend
+cp requirements.txt ContosoHotel\UpdatedApp\Frontend
 
-cp -r C:/temp/ContosoHotel/contoso_hotel/static C:\temp\ContosoHotel\UpdatedApp\Frontend\contoso_hotel\static
-cp -r C:/temp/ContosoHotel/contoso_hotel/templates C:\temp\ContosoHotel\UpdatedApp\Frontend\contoso_hotel\
-cp C:/temp/ContosoHotel/contoso_hotel/*.py C:\temp\ContosoHotel\UpdatedApp\Frontend\contoso_hotel\
+cp -r contoso_hotel/static ContosoHotel\UpdatedApp\Frontend\contoso_hotel\static
+cp -r contoso_hotel/templates ContosoHotel\UpdatedApp\Frontend\contoso_hotel\
+cp contoso_hotel/*.py ContosoHotel\UpdatedApp\Frontend\contoso_hotel\
 
-cp *.sql C:\temp\ContosoHotel\UpdatedApp\Backend
-cp startup.* C:\temp\ContosoHotel\UpdatedApp\Backend
-cp uwsgi.ini C:\temp\ContosoHotel\UpdatedApp\Backend
-cp *docker* C:\temp\ContosoHotel\UpdatedApp\Backend
-cp requirements.txt C:\temp\ContosoHotel\UpdatedApp\Backend
+cp *.sql ContosoHotel\UpdatedApp\Backend
+cp startup.* ContosoHotel\UpdatedApp\Backend
+cp uwsgi.ini ContosoHotel\UpdatedApp\Backend
+cp *docker* ContosoHotel\UpdatedApp\Backend
+cp requirements.txt ContosoHotel\UpdatedApp\Backend
 
-cp -r C:/temp/ContosoHotel/contoso_hotel/dblayer C:\temp\ContosoHotel\UpdatedApp\Backend\contoso_hotel\dblayer
-cp C:/temp/ContosoHotel/contoso_hotel/*.py C:\temp\ContosoHotel\UpdatedApp\Backend\contoso_hotel\
+cp -r contoso_hotel/dblayer ContosoHotel\UpdatedApp\Backend\contoso_hotel\dblayer
+cp contoso_hotel/*.py ContosoHotel\UpdatedApp\Backend\contoso_hotel\
+
 ```
 
-Build frontend and backend containers
+Build frontend and backend containers.
+
+Got to `ContosoHotel\UpdatedApp\Frontend` folder and run below.
 
 ```powershell
 $ACR_NAME = "acrxxx" #edit
-cd C:\temp\ContosoHotel\UpdatedApp\Frontend
 docker build -t "pycontosohotel-frontend:v1.0.0" .
 docker tag "pycontosohotel-frontend:v1.0.0" "$ACR_NAME.azurecr.io/pycontosohotel-frontend:v1.0.0"
 docker push "$ACR_NAME.azurecr.io/pycontosohotel-frontend:v1.0.0"
 ```
 
+Got to `ContosoHotel\UpdatedApp\Backend` folder and run below.
+
 ```powershell
-cd C:\temp\ContosoHotel\UpdatedApp\Backend
 docker build -t "pycontosohotel-backend:v1.0.0" .
 docker tag "pycontosohotel-backend:v1.0.0" "$ACR_NAME.azurecr.io/pycontosohotel-backend:v1.0.0"
 docker push "$ACR_NAME.azurecr.io/pycontosohotel-backend:v1.0.0"
@@ -305,7 +316,7 @@ AZURE_API_KEY="7zAw45xtgEBxxxx" #edit
 Run Speech App locally
 
 ```powershell
-pip install -r requirements
+pip install -r requirements.txt
 python app.py
 ```
 
@@ -338,16 +349,16 @@ Write-Host -ForegroundColor Green  "Chatapp URL is: $CONTOSO_CHAT_URL"
 
 ## Lab 7
 
-App Setting Configuration
+App Setting Configuration, please edit below variables
 
 ```powershell
-AZURE_OPENAI_ENDPOINT="https://aoaixxxx.openai.azure.com/" #edit
-AZURE_OPENAI_API_KEY="ATNNceXifFgxxxx" #edit
+AZURE_OPENAI_ENDPOINT="https://aoaixxxx.openai.azure.com/"
+AZURE_OPENAI_API_KEY="ATNNceXifFgxxxx"
 AZURE_OPENAI_DEPLOYMENT_ID="gpt-4o"
-AZURE_AI_SEARCH_ENDPOINT="https://contososrchxxxx.search.windows.net" #edit
-AZURE_AI_SEARCH_INDEX="brochures-vector" #edit
-AZURE_AI_SEARCH_API_KEY="jBfoENDvKzPvof9xxxx" #edit
-PGHOST="j3ufxxxx.postgres.database.azure.com" #edit
+AZURE_AI_SEARCH_ENDPOINT="https://contososrchxxxx.search.windows.net"
+AZURE_AI_SEARCH_INDEX="brochures-vector"
+AZURE_AI_SEARCH_API_KEY="jBfoENDvKzPvof9xxxx"
+PGHOST="j3ufxxxx.postgres.database.azure.com"
 PGPORT="5432"
 PGUSER="promptflow"
 PGDATABASE="pycontosohotel"
@@ -399,19 +410,17 @@ Get-ChildItem -Path '.\docker-dist\connections' -Filter '*.yaml' | Get-Content |
 # Remove-Item -Recurse -Force ./docker-dist
 ```
 
-Configure Chatbot app
+Configure Chatbot app, please edit below variables
 
 ```powershell
-$CONTOSO_HOTEL_ENV = "contosoenv996543" #edit
-$AZURE_OPENAI_ENDPOINT = "https://aoaixxxx.openai.azure.com/" #edit
-$AZURE_OPENAI_API_KEY = "ATNNceXifFgxxxx" #edit
-$AZURE_AI_SEARCH_ENDPOINT = "https://contososrchxxxx.search.windows.net" #edit
-$AZURE_AI_SEARCH_API_KEY = "jBfoENDvKzPvof9xxxx" #edit
-$PGHOST = "j3ufxxxx.postgres.database.azure.com" #edit
-```
+$CONTOSO_HOTEL_ENV = "contosoenvxxx"
+$AZURE_OPENAI_ENDPOINT = "https://aoaixxxx.openai.azure.com/"
+$AZURE_OPENAI_API_KEY = "ATNNceXifFgxxxx"
+$AZURE_AI_SEARCH_ENDPOINT = "https://contososrchxxxx.search.windows.net"
+$AZURE_AI_SEARCH_API_KEY = "jBfoENDvKzPvof9xxxx"
+$PGHOST = "j3ufxxxx.postgres.database.azure.com"
 
-```powershell
-$RG = "rg-daniel" #edit
+$RG = "rg-daniel"
 $CONTOSO_ACR_CREDENTIAL = az acr credential show --name $ACR_NAME --query "passwords[0].value" -o tsv
 $PGUSER = "promptflow"
 $PGPASSWORD = "1234ABCD!"
@@ -429,6 +438,7 @@ az containerapp create --name "chatbot" --resource-group $RG --environment "$CON
 --env-vars "AZURE_AI_SEARCH_ENDPOINT=$AZURE_AI_SEARCH_ENDPOINT" "AZURE_AI_SEARCH_API_KEY=secretref:searchkey" `
 "AZURE_OPENAI_ENDPOINT=$AZURE_OPENAI_ENDPOINT" "AZURE_OPENAI_API_KEY=secretref:openaikey" `
 "PGHOST=$PGHOST" "PGPORT=$PGPORT" "PGUSER=$PGUSER" "PGDATABASE=$PGDATABASE" "PGPASSWORD=secretref:pgpassword" --ingress external
+
 $CONTOSO_CHATBOT_URL = "https://$(az containerapp show --name "chatbot" --resource-group $RG --query 'properties.configuration.ingress.fqdn' -o tsv)"
 Write-Host -ForegroundColor Green  "Promptflow URL is: $CONTOSO_CHATBOT_URL"
 ```
@@ -437,6 +447,7 @@ Configure Frontend & Backend app
 
 ```powershell
 $CONTOSO_BACKEND_URL = "https://$(az containerapp show --name "backend" --resource-group $RG --query 'properties.configuration.ingress.fqdn' -o tsv)"
+
 az containerapp update --name "frontend" --resource-group $RG --set-env-vars "CHATBOT_BASEURL=$CONTOSO_BACKEND_URL"
 az containerapp update --name "backend" --resource-group $RG --set-env-vars "CHATBOT_BASEURL=$CONTOSO_CHATBOT_URL"
 ```
