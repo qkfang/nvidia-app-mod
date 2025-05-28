@@ -439,13 +439,13 @@ az containerapp create --name "chatbot" --resource-group $RG --environment "$CON
 "AZURE_OPENAI_ENDPOINT=$AZURE_OPENAI_ENDPOINT" "AZURE_OPENAI_API_KEY=secretref:openaikey" `
 "PGHOST=$PGHOST" "PGPORT=$PGPORT" "PGUSER=$PGUSER" "PGDATABASE=$PGDATABASE" "PGPASSWORD=secretref:pgpassword" --ingress external
 
-$CONTOSO_CHATBOT_URL = "https://$(az containerapp show --name "chatbot" --resource-group $RG --query 'properties.configuration.ingress.fqdn' -o tsv)"
-Write-Host -ForegroundColor Green  "Promptflow URL is: $CONTOSO_CHATBOT_URL"
 ```
 
 Configure Frontend & Backend app
 
 ```powershell
+$CONTOSO_CHATBOT_URL = "https://$(az containerapp show --name "chatbot" --resource-group $RG --query 'properties.configuration.ingress.fqdn' -o tsv)"
+Write-Host -ForegroundColor Green  "Promptflow URL is: $CONTOSO_CHATBOT_URL"
 $CONTOSO_BACKEND_URL = "https://$(az containerapp show --name "backend" --resource-group $RG --query 'properties.configuration.ingress.fqdn' -o tsv)"
 
 az containerapp update --name "frontend" --resource-group $RG --set-env-vars "CHATBOT_BASEURL=$CONTOSO_BACKEND_URL"
